@@ -57,8 +57,8 @@ HTML
             .main-content { padding: 15px 10px; }
             .main-header { font-size: 20px; }
             .stat-table th, .stat-table td { padding: 10px 5px; font-size: 13px; }
-            .stat-table th:nth-child(1), .stat-table td:nth-child(1) { width: 22%; } /* 순위칸 너비조절 */
-            .stat-table th:nth-child(2), .stat-table td:nth-child(2) { width: 34%; } /* 닉네임칸 너비조절 */
+            .stat-table th:nth-child(1), .stat-table td:nth-child(1) { width: 20%; } /* 순위칸 */
+            .stat-table th:nth-child(2), .stat-table td:nth-child(2) { width: 30%; } /* 닉네임칸 */
         }
     </style>
 </head>
@@ -72,7 +72,7 @@ HTML
 
     <div class="main-content">
         <div class="main-header"># BT클랜원 실시간 랭킹 </div>
-        <div class="main-desc">승률이 높은 순서대로 자동 정렬됩니다. (판수가 같으면 승리가 많은 순)</div>
+        <div class="main-desc">포인트가 높은 순서대로 자동 정렬됩니다. (1승 +100pt / 1패 -50pt)</div>
         
         <table class="stat-table">
             <thead>
@@ -82,10 +82,11 @@ HTML
                     <th>승</th>
                     <th>패</th>
                     <th>승률</th>
+                    <th>포인트</th>
                 </tr>
             </thead>
             <tbody id="ranking-table-body">
-                </tbody>
+            </tbody>
         </table>
     </div>
 
@@ -122,20 +123,25 @@ HTML
             [ "1[BT]", 0, 0 ], [ "EunGyo[BT]", 0, 0 ], [ "qktkr[BT]", 0, 0 ], [ "KimGeoMi[BT]", 0, 0 ]
         ];
 
-        // 데이터 계산
+        // 데이터 계산 (포인트 로직 추가)
         const processed = clanMembers.map(member => {
             const name = member[0];
             const wins = member[1];
             const loses = member[2];
             const total = wins + loses;
             const winRate = total === 0 ? 0 : parseFloat(((wins / total) * 100).toFixed(1));
-            return { name, wins, loses, winRate };
+            
+            // 🔥 포인트 계산 규칙: 승리당 +100, 패배당 -50
+            const points = (wins * 100) + (loses * -50); 
+            
+            return { name, wins, loses, winRate, points, total };
         });
 
-        // 승률 정렬
+        // 랭킹 정렬 기준 변경 (포인트 순)
         processed.sort((a, b) => {
-            if (b.winRate !== a.winRate) return b.winRate - a.winRate;
-            return b.wins - a.wins;
+            if (b.points !== a.points) return b.points - a.points; // 1. 포인트 높은 순
+            if (b.wins !== a.wins) return b.wins - a.wins;         // 2. 포인트 같으면 승리 많은 순
+            return a.total - b.total;                              // 3. 그것도 같으면 판수 적은 순
         });
 
         // 표 화면 그리기
@@ -160,13 +166,17 @@ HTML
                 rowClass = 'bg-rank-3';
             }
 
+            // 포인트 양수/음수 색상 구분 추가 (0 이상은 노란빛 연두, 음수는 흐린 빨강)
+            const pointColor = member.points >= 0 ? '#e5c07b' : '#ff6b6b';
+
             const row = `
                 <tr class="${rowClass}">
                     <td class="${rankClass}">${rankText}</td>
                     <td style="text-align: left; font-weight: 500; color: #f2f3f5;">${member.name}</td>
                     <td style="color: #43b581; font-weight: bold;">${member.wins}</td>
                     <td style="color: #f04747;">${member.loses}</td>
-                    <td style="color: #5865f2; font-weight: bold;">${member.winRate}%</td>
+                    <td style="color: #b5bac1;">${member.winRate}%</td>
+                    <td style="color: ${pointColor}; font-weight: bold;">${member.points.toLocaleString()} pt</td>
                 </tr>
             `;
             tbody.innerHTML += row;
