@@ -5,20 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>클랜원 실시간 전적 랭킹</title>
     <style>
-        body { background-color: #2f3136; color: #fff; font-family: sans-serif; margin: 0; padding: 0; }
-        
-        /* 화면 전체에서 중앙에 내용을 모아주는 핵심 틀 */
-        .wrapper { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
-        
-        .main-content { background-color: #36393f; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .main-header { font-size: 22px; font-weight: bold; margin-bottom: 5px; color: #fff; }
-        .main-desc { font-size: 14px; color: #b9bbbe; margin-bottom: 20px; border-bottom: 1px solid #42464d; padding-bottom: 15px; }
-        
+        body { background-color: #2f3136; color: #fff; font-family: sans-serif; }
+        .main-content { padding: 15px 10px; }
+        .main-header { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
+        .main-desc { font-size: 14px; color: #b9bbbe; margin-bottom: 15px; }
         .stat-table { width: 100%; border-collapse: collapse; text-align: center; }
-        .stat-table th, .stat-table td { padding: 12px 5px; font-size: 14px; border-bottom: 1px solid #40444b; }
-        .stat-table th { color: #b9bbbe; font-weight: 600; background-color: #2f3136; }
-        .stat-table th:nth-child(1), .stat-table td:nth-child(1) { width: 18%; } /* 순위 */
-        .stat-table th:nth-child(2), .stat-table td:nth-child(2) { width: 32%; } /* 닉네임 */
+        .stat-table th, .stat-table td { padding: 10px 5px; font-size: 13px; border-bottom: 1px solid #40444b; }
+        .stat-table th:nth-child(1), .stat-table td:nth-child(1) { width: 22%; } /* 순위칸 너비조절 */
+        .stat-table th:nth-child(2), .stat-table td:nth-child(2) { width: 34%; } /* 닉네임칸 너비조절 */
         
         /* 상위권 배경색 하이라이트 */
         .bg-rank-1 { background-color: rgba(241, 196, 15, 0.08); }
@@ -31,27 +25,24 @@
 </head>
 <body>
 
-    <!-- 중앙 정렬을 위해 전체를 감싸는 wrapper 추가 -->
-    <div class="wrapper">
-        <div class="main-content">
-            <div class="main-header"># BT클랜원 실시간 랭킹 </div>
-            <div class="main-desc">포인트가 높은 순서대로 정렬됩니다. (판수가 있으면 마이너스 점수라도 0승 0패보다 우위)</div>
+    <div class="main-content">
+        <div class="main-header"># BT클랜원 실시간 랭킹 </div>
+        <div class="main-desc">포인트가 높은 순서대로 정렬됩니다. (판수가 있으면 마이너스 점수라도 0승 0패보다 우위)</div>
 
-            <table class="stat-table">
-                <thead>
-                    <tr>
-                        <th>순위</th>
-                        <th>닉네임</th>
-                        <th>승</th>
-                        <th>패</th>
-                        <th>승률</th>
-                        <th>포인트</th>
-                    </tr>
-                </thead>
-                <tbody id="ranking-table-body">
-                </tbody>
-            </table>
-        </div>
+        <table class="stat-table">
+            <thead>
+                <tr>
+                    <th>순위</th>
+                    <th>닉네임</th>
+                    <th>승</th>
+                    <th>패</th>
+                    <th>승률</th>
+                    <th>포인트</th>
+                </tr>
+            </thead>
+            <tbody id="ranking-table-body">
+            </tbody>
+        </table>
     </div>
 
     <script>
@@ -87,7 +78,7 @@
             [ "1[BT]", 0, 0 ], [ "EunGyo[BT]", 0, 0 ], [ "qktkr[BT]", 0, 0 ], [ "KimGeoMi[BT]", 0, 0 ]
         ];
 
-        // 1. 데이터 계산
+        // 1. 데이터 계산 (낙오자 없이 모두 포함)
         const processed = clanMembers.map(member => {
             const name = member[0];
             const wins = member[1];
@@ -99,14 +90,19 @@
             return { name, wins, loses, winRate, points, total };
         });
 
-        // 2. 특수 랭킹 정렬 규칙 적용 (0승 0패는 아래로 깔기)
+        // 2. 형님 맞춤형 특수 정렬 규칙
         processed.sort((a, b) => {
+            // 둘 다 전적이 한판이라도 있는 경우 -> 포인트 높은 순
             if (a.total > 0 && b.total > 0) {
                 if (b.points !== a.points) return b.points - a.points;
                 return b.winRate - a.winRate;
             }
+            // a만 전적이 있고 b는 0승 0패인 경우 -> 마이너스 점수라도 전적 있는 a가 위로!
             if (a.total > 0 && b.total === 0) return -1;
+            // b만 전적이 있고 a는 0승 0패인 경우 -> b가 위로!
             if (b.total > 0 && a.total === 0) return 1;
+            
+            // 둘 다 0승 0패인 경우 -> 순서 그대로 유지
             return 0;
         });
 
