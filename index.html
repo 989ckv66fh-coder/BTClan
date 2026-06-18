@@ -8,21 +8,19 @@
 
     <title>클랜원 실시간 전적 랭킹</title>
     <style>
-        body { background-color: #2f3136; color: #fff; font-family: sans-serif; }
+        body { background-color: #2f3136; color: #fff; font-family: sans-serif; margin: 0; padding: 0; }
         .main-content { padding: 15px 10px; }
         .main-header { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
         .main-desc { font-size: 14px; color: #b9bbbe; margin-bottom: 15px; }
         .stat-table { width: 100%; border-collapse: collapse; text-align: center; }
         .stat-table th, .stat-table td { padding: 10px 5px; font-size: 13px; border-bottom: 1px solid #40444b; }
-        .stat-table th:nth-child(1), .stat-table td:nth-child(1) { width: 22%; } /* 순위칸 너비조절 */
-        .stat-table th:nth-child(2), .stat-table td:nth-child(2) { width: 34%; } /* 닉네임칸 너비조절 */
+        .stat-table th:nth-child(1), .stat-table td:nth-child(1) { width: 22%; } 
+        .stat-table th:nth-child(2), .stat-table td:nth-child(2) { width: 34%; } 
         
-        /* 상위권 배경색 하이라이트 */
         .bg-rank-1 { background-color: rgba(241, 196, 15, 0.08); }
         .bg-rank-2 { background-color: rgba(149, 165, 166, 0.08); }
         .bg-rank-3 { background-color: rgba(211, 84, 0, 0.08); }
         
-        /* 메달 이모지 크기 키우기 */
         .medal { font-size: 16px; }
     </style>
 </head>
@@ -49,21 +47,8 @@
     </div>
 
     <script>
-        // ★형님은 여기 아래 닉네임과 승, 패 숫자만 고치시면 됩니다!
+        // 명단 데이터 오류 검수 완료 및 재배열
         const clanMembers = [
-            [ "SapziL[BT]", 0, 0 ],
-            [ "Sun[BT]", 0, 0 ],
-            [ "Unique[BT]", 0, 0 ],
-            [ "Kyu[BT]", 0, 0 ], // 여기 형님 전적!
-            [ "Pirate[BT]", 0, 0 ],
-            [ "HanJin[BT]", 0, 0 ],
-            [ "JAVA[BT]", 0, 0 ],
-            [ "zzerg[BT]", 0, 0 ],
-            [ "heajin[BT]", 0, 0 ],
-            [ "Lattee[BT]", 0, 0 ],
-            [ "Ocean[BT]", 0, 0 ],
-            [ "Sunbee[BT]", 0, 0 ],  // 여기 형님 전적!
-
-            // 활동대원 35명 시작
-            [ "Chu[BT]", 0, 0 ], [ "Dkey[BT]", 0, 0 ], [ "Ulrali[BT]", 0, 0 ], [ "Min[BT]", 0, 0 ], [ "Hunt[BT]", 0, 0 ],
-            [ "ohno~[BT]", 0, 0 ], [ "gnl[BT]", 0, 0 ], [ "rAy[BT]", 0, 0 ], [ "rjrl[BT]", 0, 0 ], [ "Helper[BT]", 0,
+            [ "SapziL[BT]", 0, 0 ], [ "Sun[BT]", 0, 0 ], [ "Unique[BT]", 0, 0 ], [ "Kyu[BT]", 0, 0 ], 
+            [ "Pirate[BT]", 0, 0 ], [ "HanJin[BT]", 0, 0 ], [ "JAVA[BT]", 0, 0 ], [ "zzerg[BT]", 0, 0 ], 
+            [ "heajin[BT]", 0, 0 ], [ "Lattee[BT]", 0, 0 ], [ "Ocean[BT]",
