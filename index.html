@@ -1,6 +1,8 @@
+HTML
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    https://989ckv66fh-coder.github.iobtclan/naver130e7144353356d9ac7eddc8322755a3.htm
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>클랜원 실시간 전적 랭킹</title>
@@ -56,8 +58,8 @@
             .main-content { padding: 15px 10px; }
             .main-header { font-size: 20px; }
             .stat-table th, .stat-table td { padding: 10px 5px; font-size: 13px; }
-            .stat-table th:nth-child(1), .stat-table td:nth-child(1) { width: 20%; } /* 순위칸 */
-            .stat-table th:nth-child(2), .stat-table td:nth-child(2) { width: 30%; } /* 닉네임칸 */
+            .stat-table th:nth-child(1), .stat-table td:nth-child(1) { width: 22%; } /* 순위칸 너비조절 */
+            .stat-table th:nth-child(2), .stat-table td:nth-child(2) { width: 34%; } /* 닉네임칸 너비조절 */
         }
     </style>
 </head>
@@ -71,7 +73,7 @@
 
     <div class="main-content">
         <div class="main-header"># BT클랜원 실시간 랭킹 </div>
-        <div class="main-desc">포인트가 높은 순서대로 자동 정렬됩니다. (1승 +100pt / 1패 -50pt)</div>
+        <div class="main-desc">승률이 높은 순서대로 자동 정렬됩니다. (판수가 같으면 승리가 많은 순)</div>
         
         <table class="stat-table">
             <thead>
@@ -81,45 +83,42 @@
                     <th>승</th>
                     <th>패</th>
                     <th>승률</th>
-                    <th>포인트</th>
                 </tr>
             </thead>
             <tbody id="ranking-table-body">
-            </tbody>
+                </tbody>
         </table>
     </div>
 
     <script>
         // ★형님은 여기 아래 닉네임과 승, 패 숫자만 고치시면 됩니다!
         const clanMembers = [
-            [ "SapziL[BT]", 0, 0 ],
-            [ "Sun[BT]", 0, 0 ],
-            [ "Unique[BT]", 0, 0 ],
-            [ "Kyu[BT]", 0, 0 ], // 여기 형님 전적!
-            [ "Pirate[BT]", 0, 0 ],
-            [ "HanJin[BT]", 0, 0 ],
-            [ "JAVA[BT]", 0, 0 ],
-            [ "zzerg[BT]", 0, 0 ],
-            [ "heajin[BT]", 0, 0 ],
-            [ "Lattee[BT]", 0, 0 ],
-            [ "Ocean[BT]", 0, 0 ],
-            [ "Sunbee[BT]", 0, 0 ],
+            [ "타무", 100, 1 ],
+            [ "멜로", 100, 2 ],
+            [ "보이", 100, 0 ],
+            [ "줄라이", 100, 9 ], // 여기 형님 전적!
+            [ "엘리트멤버1", 22, 10 ],
+            [ "엘리트멤버2", 19, 15 ],
+            [ "엘리트멤버3", 30, 28 ],
+            [ "엘리트멤버4", 15, 10 ],
+            [ "엘리트멤버5", 12, 8 ],
+            [ "엘리트멤버6", 8, 4 ],
+            [ "엘리트멤버7", 5, 2 ],
+            [ "엘리트멤버8", 1, 0 ],
             
             // 활동대원 35명 시작
-            [ "Chu[BT]", 0, 0 ], [ "Dkey[BT]", 0, 0 ], [ "Ulrali[BT]", 0, 0 ], [ "Min[BT]", 0, 0 ], [ "Hunt[BT]", 0, 0 ],
-            [ "ohno~[BT]", 0, 0 ], [ "gnl[BT]", 0, 0 ], [ "rAy[BT]", 0, 0 ], [ "rjrl[BT]", 0, 0 ], [ "Helper[BT]", 0, 0 ],
-            [ "OK[BT]", 0, 0 ], [ "Grit[BT]", 0, 0 ], [ "5s[BT]", 0, 0 ], [ "Zec[BT]", 0, 0 ], [ "02[BT]", 0, 0 ],
-            [ "2[BT]", 0, 0 ], [ "Sang[BT]", 0, 0 ], [ "elca[BT]", 0, 0 ], [ "JK[BT]", 0, 0 ], [ "Pong9[BT]", 0, 0 ],
-            [ "Jusin[BT]", 0, 0 ], [ "Mom[BT]", 0, 0 ], [ "waassup[BT]", 0, 0 ], [ "ILDO[BT]", 0, 0 ], [ "dodo[BT]", 0, 0 ],
-            [ "Sharp1[BT]", 0, 0 ], [ "Saske[BT]", 0, 0 ], [ "gkawnf[BT]", 0, 0 ], [ "GGUNG[BT]", 0, 0 ], [ "Epic[BT]", 0, 0 ],
-            [ "dhfl[BT]", 0, 0 ], [ "wisa[BT]", 0, 0 ], [ "hsy[BT]", 0, 0 ], [ "Hana[BT]", 0, 0 ], [ "911[BT]", 0, 0 ],
+            [ "활동대원1", 25, 20 ], [ "활동대원2", 14, 14 ], [ "활동대원3", 9, 12 ], [ "활동대원4", 33, 21 ], [ "활동대원5", 18, 16 ],
+            [ "활동대원6", 5, 9 ], [ "활동대원7", 21, 15 ], [ "활동대원8", 11, 11 ], [ "활동대원9", 4, 3 ], [ "활동대원10", 0, 2 ],
+            [ "활동대원11", 17, 13 ], [ "활동대원12", 22, 25 ], [ "활동대원13", 8, 8 ], [ "활동대원14", 19, 14 ], [ "활동대원15", 30, 32 ],
+            [ "활동대원16", 12, 10 ], [ "활동대원17", 7, 5 ], [ "활동대원18", 3, 3 ], [ "활동대원19", 15, 12 ], [ "활동대원20", 26, 24 ],
+            [ "활동대원21", 10, 8 ], [ "활동대원22", 6, 7 ], [ "활동대원23", 2, 5 ], [ "활동대원24", 14, 11 ], [ "활동대원25", 21, 19 ],
+            [ "활동대원26", 9, 8 ], [ "활동대원27", 5, 4 ], [ "활동대원28", 1, 2 ], [ "활동대원29", 18, 15 ], [ "활동대원30", 22, 20 ],
+            [ "활동대원31", 13, 11 ], [ "활동대원32", 7, 9 ], [ "활동대원33", 4, 6 ], [ "활동대원34", 16, 13 ], [ "활동대원35", 20, 18 ],
 
             // 신입회원 15명 시작
-            [ "Yellow[BT]", 0, 0 ], [ "c[BT]", 0, 0 ], [ "Janbari[BT]", 0, 0 ], [ "eodrn[BT]", 0, 0 ], [ "st[BT]", 0, 0 ],
-            [ "tamoo[BT]", 0, 0 ], [ "YiTA[BT]", 0, 0 ], [ "Nature[BT]", 0, 0 ], [ "Cherry+[BT]", 0, 0 ], [ "gus[BT]", 0, 0 ],
-            [ "k0res[BT]", 0, 0 ], [ "gns[BT]", 0, 0 ], [ "gun[BT]", 0, 0 ], [ "Peri[BT]", 0, 0 ], [ "wns[BT]", 0, 0 ], [ "Sorry[BT]", 0, 0 ],[ "mikseogi[BT]", 0, 0 ],[ "Cuzz[BT]", 0, 0 ],
-            [ "UT[BT]", 0, 0 ], [ "Like[BT]", 0, 0 ], [ "Sniper[BT]", 0, 0 ], [ "Melo[BT]", 0, 0 ], [ "Boy[BT]", 0, 0 ], [ "Visage[BT]", 0, 0 ], 
-            [ "1[BT]", 0, 0 ], [ "EunGyo[BT]", 0, 0 ], [ "qktkr[BT]", 0, 0 ], [ "KimGeoMi[BT]", 0, 0 ]
+            [ "신입회원1", 10, 5 ], [ "신입회원2", 7, 3 ], [ "신입회원3", 5, 5 ], [ "신입회원4", 4, 2 ], [ "신입회원5", 3, 1 ],
+            [ "신입회원6", 2, 2 ], [ "신입회원7", 1, 1 ], [ "신입회원8", 0, 0 ], [ "신입회원9", 6, 4 ], [ "신입회원10", 8, 7 ],
+            [ "신입회원11", 5, 4 ], [ "신입회원12", 3, 2 ], [ "신입회원13", 2, 1 ], [ "신입회원14", 1, 3 ], [ "신입회원15", 0, 1 ]
         ];
 
         // 데이터 계산
@@ -129,18 +128,13 @@
             const loses = member[2];
             const total = wins + loses;
             const winRate = total === 0 ? 0 : parseFloat(((wins / total) * 100).toFixed(1));
-            
-            // 포인트 계산: 1승당 +100, 1패당 -50
-            const points = (wins * 100) + (loses * -50); 
-            
-            return { name, wins, loses, winRate, points, total };
+            return { name, wins, loses, winRate };
         });
 
-        // 랭킹 정렬 (포인트 높은 순 -> 승리 많은 순 -> 판수 적은 순)
+        // 승률 정렬
         processed.sort((a, b) => {
-            if (b.points !== a.points) return b.points - a.points;
-            if (b.wins !== a.wins) return b.wins - a.wins;
-            return a.total - b.total;
+            if (b.winRate !== a.winRate) return b.winRate - a.winRate;
+            return b.wins - a.wins;
         });
 
         // 표 화면 그리기
@@ -165,9 +159,6 @@
                 rowClass = 'bg-rank-3';
             }
 
-            // 포인트 색상 (0 이상은 노란빛 연두, 음수는 빨강)
-            const pointColor = member.points >= 0 ? '#e5c07b' : '#ff6b6b';
-
             const row = `
                 <tr class="${rowClass}">
                     <td class="${rankClass}">${rankText}</td>
@@ -175,7 +166,6 @@
                     <td style="color: #43b581; font-weight: bold;">${member.wins}</td>
                     <td style="color: #f04747;">${member.loses}</td>
                     <td style="color: #5865f2; font-weight: bold;">${member.winRate}%</td>
-                    <td style="color: ${pointColor}; font-weight: bold;">${member.points.toLocaleString()} pt</td>
                 </tr>
             `;
             tbody.innerHTML += row;
