@@ -1,3 +1,11 @@
+아, 맞습니다 형님! 원래 기존 코드의 style 태그 안을 보면 순위별로 금·은·동메달 아이콘 🥇 🥈 🥉 이나 특수 효과를 주려고 했던 클래스(rankClass) 흔적이 왼쪽에 남아있었네요.
+
+지금 코드는 왼쪽에 그냥 숫자(1, 2, 3)만 밋밋하게 나오다 보니 허전해 보이셨을 겁니다.
+
+왼쪽 순위 칸에 🥇, 🥈, 🥉 메달 이모지가 깔끔하게 들어가도록 script 부분을 보완했습니다. 아래 코드로 다시 덮어씌워 보세요!
+
+🥇 왼쪽 순위 칸에 메달 추가된 전체 코드
+HTML
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -5,7 +13,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>클랜원 실시간 전적 랭킹</title>
     <style>
-        /* 기본 스타일 예시 (기존 스타일이 있으시면 대체하셔도 됩니다) */
         body { background-color: #2f3136; color: #fff; font-family: sans-serif; }
         .main-content { padding: 15px 10px; }
         .main-header { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
@@ -14,9 +21,14 @@
         .stat-table th, .stat-table td { padding: 10px 5px; font-size: 13px; border-bottom: 1px solid #40444b; }
         .stat-table th:nth-child(1), .stat-table td:nth-child(1) { width: 22%; } /* 순위칸 너비조절 */
         .stat-table th:nth-child(2), .stat-table td:nth-child(2) { width: 34%; } /* 닉네임칸 너비조절 */
-        .bg-rank-1 { background-color: rgba(241, 196, 15, 0.1); }
-        .bg-rank-2 { background-color: rgba(149, 165, 166, 0.1); }
-        .bg-rank-3 { background-color: rgba(211, 84, 0, 0.1); }
+        
+        /* 상위권 배경색 하이라이트 */
+        .bg-rank-1 { background-color: rgba(241, 196, 15, 0.08); }
+        .bg-rank-2 { background-color: rgba(149, 165, 166, 0.08); }
+        .bg-rank-3 { background-color: rgba(211, 84, 0, 0.08); }
+        
+        /* 메달 이모지 크기 키우기 */
+        .medal { font-size: 16px; }
     </style>
 </head>
 <body>
@@ -55,7 +67,11 @@
             [ "heajin[BT]", 0, 0 ],
             [ "Lattee[BT]", 0, 0 ],
             [ "Ocean[BT]", 0, 0 ],
-            [ "Sunbee[BT]", 0, 0 ], // 여기 형님 전적!
+            [ "Sunbee[BT]", 0, 0 ],
+            [ "타무", 100, 1 ],
+            [ "멜로", 100, 2 ],
+            [ "보이", 100, 0 ],
+            [ "줄라이", 100, 9 ], // 여기 형님 전적!
 
             // 활동대원 35명 시작
             [ "Chu[BT]", 0, 0 ], [ "Dkey[BT]", 0, 0 ], [ "Ulrali[BT]", 0, 0 ], [ "Min[BT]", 0, 0 ], [ "Hunt[BT]", 0, 0 ],
@@ -81,8 +97,6 @@
             const loses = member[2];
             const total = wins + loses;
             const winRate = total === 0 ? 0 : parseFloat(((wins / total) * 100).toFixed(1));
-            
-            // 포인트 계산: 1승당 +100, 1패당 -50
             const points = (wins * 100) + (loses * -50); 
             
             return { name, wins, loses, winRate, points, total };
@@ -99,23 +113,25 @@
         processed.forEach((member, index) => {
             const rank = index + 1;
             let rowClass = '';
-            let rankClass = '';
             let rankText = rank;
 
+            // 1, 2, 3등 왼쪽에 메달 달아주기
             if (rank === 1) {
                 rowClass = 'bg-rank-1';
+                rankText = '<span class="medal">🥇</span> 1';
             } else if (rank === 2) {
                 rowClass = 'bg-rank-2';
+                rankText = '<span class="medal">🥈</span> 2';
             } else if (rank === 3) {
                 rowClass = 'bg-rank-3';
+                rankText = '<span class="medal">🥉</span> 3';
             }
 
-            // 포인트 색상 (0 이상은 노란빛 연두, 음수는 빨강)
             const pointColor = member.points >= 0 ? '#e5c07b' : '#ff6b6b';
 
             const row = `
                 <tr class="${rowClass}">
-                    <td class="${rankClass}">${rankText}</td>
+                    <td style="font-weight: bold; color: #fff;">${rankText}</td>
                     <td style="text-align: left; font-weight: 500; color: #f2f3f5;">${member.name}</td>
                     <td style="color: #43b581; font-weight: bold;">${member.wins}</td>
                     <td style="color: #f04747;">${member.loses}</td>
