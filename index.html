@@ -4,7 +4,6 @@ HTML
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="naver-site-verification" content="130e7144353356d9ac7eddc8322755a3" />
     <title>클랜원 실시간 전적 랭킹</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -58,8 +57,12 @@ HTML
             .main-content { padding: 15px 10px; }
             .main-header { font-size: 20px; }
             .stat-table th, .stat-table td { padding: 10px 5px; font-size: 13px; }
-            .stat-table th:nth-child(1), .stat-table td:nth-child(1) { width: 22%; } /* 순위칸 너비조절 */
-            .stat-table th:nth-child(2), .stat-table td:nth-child(2) { width: 34%; } /* 닉네임칸 너비조절 */
+            .stat-table th:nth-child(1), .stat-table td:nth-child(1) { width: 15%; } 
+            .stat-table th:nth-child(2), .stat-table td:nth-child(2) { width: 25%; } 
+            .stat-table th:nth-child(3), .stat-table td:nth-child(3) { width: 12%; } 
+            .stat-table th:nth-child(4), .stat-table td:nth-child(4) { width: 12%; } 
+            .stat-table th:nth-child(5), .stat-table td:nth-child(5) { width: 16%; } 
+            .stat-table th:nth-child(6), .stat-table td:nth-child(6) { width: 20%; } 
         }
     </style>
 </head>
@@ -73,7 +76,7 @@ HTML
 
     <div class="main-content">
         <div class="main-header"># BT클랜원 실시간 랭킹 </div>
-        <div class="main-desc">승률이 높은 순서대로 자동 정렬됩니다. (판수가 같으면 승리가 많은 순)</div>
+        <div class="main-desc">포인트가 높은 순서대로 자동 정렬됩니다. (승리 +100점 / 패배 -50점)</div>
         
         <table class="stat-table">
             <thead>
@@ -83,10 +86,11 @@ HTML
                     <th>승</th>
                     <th>패</th>
                     <th>승률</th>
+                    <th>포인트</th>
                 </tr>
             </thead>
             <tbody id="ranking-table-body">
-                </tbody>
+            </tbody>
         </table>
     </div>
 
@@ -128,12 +132,16 @@ HTML
             const loses = member[2];
             const total = wins + loses;
             const winRate = total === 0 ? 0 : parseFloat(((wins / total) * 100).toFixed(1));
-            return { name, wins, loses, winRate };
+            
+            // 포인트 공식: 승리 +100 / 패배 -50
+            const points = (wins * 100) - (loses * 50); 
+            
+            return { name, wins, loses, winRate, points };
         });
 
-        // 승률 정렬
+        // 정렬 기준: 포인트 높은 순 -> 같으면 승리 많은 순
         processed.sort((a, b) => {
-            if (b.winRate !== a.winRate) return b.winRate - a.winRate;
+            if (b.points !== a.points) return b.points - a.points;
             return b.wins - a.wins;
         });
 
@@ -165,7 +173,8 @@ HTML
                     <td style="text-align: left; font-weight: 500; color: #f2f3f5;">${member.name}</td>
                     <td style="color: #43b581; font-weight: bold;">${member.wins}</td>
                     <td style="color: #f04747;">${member.loses}</td>
-                    <td style="color: #5865f2; font-weight: bold;">${member.winRate}%</td>
+                    <td style="color: #b5bac1;">${member.winRate}%</td>
+                    <td style="color: #e5a93c; font-weight: bold;">${member.points.toLocaleString()}점</td>
                 </tr>
             `;
             tbody.innerHTML += row;
