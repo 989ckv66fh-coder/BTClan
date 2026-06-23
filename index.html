@@ -34,6 +34,7 @@
         .bg-rank-2 { background-color: rgba(149, 165, 166, 0.08); }
         .bg-rank-3 { background-color: rgba(211, 84, 0, 0.08); }
         .medal { font-size: 16px; }
+        .champion-trophy { color: #f1c40f; margin-left: 5px; font-size: 14px; font-weight: bold; letter-spacing: -2px; }
 
         /* 방문자 카운터 */
         .visitor-counter {
@@ -97,9 +98,14 @@
 
     <script>
         let viewMode = 'current';
+        
+        let champions = {
+            firstHalf: "",  
+            secondHalf: ""  
+        };
 
         // ★ 형님은 여기에 "현재 진행 중인 시즌 전적"만 지금처럼 입력하시면 됩니다!
-        // 7월 1일이 되면 이 숫자를 싹 다 0, 0으로 리셋하시고 하반기 전적을 새로 치시면 됩니다.
+        // 7월 1일이 되면 이 숫자들을 싹 다 0, 0으로 지워주시면 됩니다.
         const clanMembers = [
             [ "SapziL[BT]", 0, 0 ],
             [ "Sun[BT]", 0, 0 ],
@@ -131,73 +137,82 @@
             [ "Visage[BT]", 0, 0 ], [ "1[BT]", 0, 0 ], [ "EunGyo[BT]", 0, 0 ], [ "qktkr[BT]", 0, 0 ], [ "KimGeoMi[BT]", 0, 0 ], [ "RINKING[BT]", 4, 1 ], [ "Tenga[BT]", 3, 3 ]
         ];
 
-        // 2026년 상/하반기 고정 제어 로직
         function getRankData() {
             const now = new Date();
-            const isSecondHalf = now.getMonth() >= 6; // 7월 1일 이후면 true
+            const year = now.getFullYear();
+            const isSecondHalf = now.getMonth() >= 6; 
 
-            const prevSeasonKey = "bt_2026_first_half_snapshot";
-            let savedSnapshot = localStorage.getItem(prevSeasonKey);
+            const prevSnapshotKey = "bt_2026_first_half_snapshot";
+            let savedSnapshot = localStorage.getItem(prevSnapshotKey);
 
-            // 7월 1일이 되었을 때 딱 한 번 6월까지의 전적을 완전히 고정 백업함
             if (isSecondHalf && !savedSnapshot) {
-                localStorage.setItem(prevSeasonKey, JSON.stringify(clanMembers));
-                savedSnapshot = localStorage.getItem(prevSeasonKey);
+                localStorage.setItem(prevSnapshotKey, JSON.stringify(clanMembers));
+                savedSnapshot = localStorage.getItem(prevSnapshotKey);
             }
 
-            // 만약 하반기가 되었고, 형님이 메뉴에서 '지난 시즌'을 클릭했다면 백업된 상반기 데이터를 뿌려줌
+            if (savedSnapshot) {
+                champions.firstHalf = calcWinner(JSON.parse(savedSnapshot));
+            }
+
+            if (year > 2026) {
+                champions.secondHalf = calcWinner(clanMembers); 
+            }
+
             let targetData = clanMembers;
             if (isSecondHalf && viewMode === 'prev') {
                 targetData = JSON.parse(savedSnapshot);
             }
 
             return targetData.map(member => {
-                const name = member[0];
-                const wins = member[1];
-                const loses = member[2];
-                const total = wins + loses;
+                const name = member[0]; const wins = member[1]; const loses = member[2]; const total = wins + loses;
                 const winRate = total === 0 ? 0 : parseFloat(((wins / total) * 100).toFixed(1));
                 const points = (wins * 100) + (loses * -50); 
-
                 return { name, wins, loses, winRate, points, total };
             });
         }
 
+        function calcWinner(dataArray) {
+            const parsed = dataArray.map(m => {
+                const total = m[1] + m[2];
+                return { name: m[0], total, points: (m[1] * 100) + (m[2] * -50), winRate: total === 0 ? 0 : m[1]/total };
+            });
+            parsed.sort((a, b) => {
+                if (a.total > 0 && b.total > 0) { if (b.points !== a.points) return b.points - a.points; return b.winRate - a.winRate; }
+                if (a.total > 0 && b.total === 0) return -1; if (b.total > 0 && a.total === 0) return 1; return 0;
+            });
+            return (parsed.length > 0 && parsed[0].total > 0) ? parsed[0].name : "";
+        }
+
         function renderRanking() {
             const now = new Date();
+            const year = now.getFullYear();
             const isSecondHalf = now.getMonth() >= 6;
 
             const btnCurrent = document.getElementById('btn-current');
             const btnPrev = document.getElementById('btn-prev');
             const titleEl = document.getElementById('page-title');
 
-            // 1. 날짜에 맞춰서 메뉴 이름 구성 개편
-            if (!isSecondHalf) {
-                // 6월 30일까지는 상반기 실시간만 노출
+            if (!isSecondHalf && year === 2026) {
                 btnCurrent.innerText = "🔥 2026 상반기 실시간";
                 btnPrev.classList.add('hidden');
                 titleEl.innerText = "# BT클랜원 시즌 랭킹 (2026 상반기)";
             } else {
-                // 7월 1일부터는 하반기가 메인이 되고, 상반기 최종 탭이 활성화됨
-                btnCurrent.innerText = "🔥 2026 하반기 실시간";
-                btnPrev.innerText = "📜 2026 상반기 최종";
+                const curName = isSecondHalf ? `${year} 하반기` : `${year} 상반기`;
+                const prevName = isSecondHalf ? `${year} 상반기` : `${year-1} 하반기`;
+
+                btnCurrent.innerText = `🔥 ${curName} 실시간`;
+                btnPrev.innerText = `📜 ${prevName} 최종`;
                 btnPrev.classList.remove('hidden');
 
-                if (viewMode === 'current') titleEl.innerText = "# BT클랜원 시즌 랭킹 (2026 하반기)";
-                if (viewMode === 'prev') titleEl.innerText = "# BT클랜원 지난 시즌 랭킹 (2026 상반기 최종 명예의 전당)";
+                if (viewMode === 'current') titleEl.innerText = `# BT클랜원 시즌 랭킹 (${curName})`;
+                if (viewMode === 'prev') titleEl.innerText = `# BT클랜원 지난 시즌 랭킹 (${prevName} 최종 명예의 전당)`;
             }
 
             const processed = getRankData();
 
-            // 정렬 알고리즘 (0승0패 하단 배치)
             processed.sort((a, b) => {
-                if (a.total > 0 && b.total > 0) {
-                    if (b.points !== a.points) return b.points - a.points;
-                    return b.winRate - a.winRate;
-                }
-                if (a.total > 0 && b.total === 0) return -1;
-                if (b.total > 0 && a.total === 0) return 1;
-                return 0;
+                if (a.total > 0 && b.total > 0) { if (b.points !== a.points) return b.points - a.points; return b.winRate - a.winRate; }
+                if (a.total > 0 && b.total === 0) return -1; if (b.total > 0 && a.total === 0) return 1; return 0;
             });
 
             const tbody = document.getElementById('ranking-table-body');
@@ -205,8 +220,7 @@
 
             processed.forEach((member, index) => {
                 const rank = index + 1;
-                let rowClass = '';
-                let rankText = rank;
+                let rowClass = ''; let rankText = rank;
 
                 if (rank === 1) { rowClass = 'bg-rank-1'; rankText = '<span class="medal">🥇</span> 1'; } 
                 else if (rank === 2) { rowClass = 'bg-rank-2'; rankText = '<span class="medal">🥈</span> 2'; } 
@@ -214,10 +228,28 @@
 
                 const pointColor = member.points >= 0 ? '#e5c07b' : '#ff6b6b';
 
+                let trophyHtml = "";
+                if (viewMode === 'current') {
+                    let trophyCount = 0;
+                    
+                    if (isSecondHalf && member.name === champions.firstHalf) {
+                        trophyCount++;
+                    }
+                    if (year > 2026 && member.name === champions.secondHalf) {
+                        trophyCount++;
+                    }
+
+                    if (trophyCount === 1) {
+                        trophyHtml = '<span class="champion-trophy" title="디펜딩 챔피언">🏆</span>';
+                    } else if (trophyCount === 2) {
+                        trophyHtml = '<span class="champion-trophy" title="★ 통합 왕좌 ★ 상/하반기 연속 우승자">🏆🏆</span>';
+                    }
+                }
+
                 const row = `
                     <tr class="${rowClass}">
                         <td style="font-weight: bold; color: #fff;">${rankText}</td>
-                        <td style="text-align: left; font-weight: 500; color: #f2f3f5;">${member.name}</td>
+                        <td style="text-align: left; font-weight: 500; color: #f2f3f5;">${member.name}${trophyHtml}</td>
                         <td style="color: #43b581; font-weight: bold;">${member.wins}</td>
                         <td style="color: #f04747;">${member.loses}</td>
                         <td style="color: #5865f2; font-weight: bold;">${member.winRate}%</td>
@@ -230,13 +262,10 @@
 
         function selectCategory(mode) {
             viewMode = mode;
-            
             document.getElementById('btn-current').classList.remove('active');
             document.getElementById('btn-prev').classList.remove('active');
-            
             if(mode === 'current') document.getElementById('btn-current').classList.add('active');
             if(mode === 'prev') document.getElementById('btn-prev').classList.add('active');
-
             renderRanking();
         }
 
@@ -244,29 +273,16 @@
             let totalViews = localStorage.getItem('bt_total_views') || 24;
             let todayViews = localStorage.getItem('bt_today_views') || 3;
             let lastDate = localStorage.getItem('bt_last_date');
-            
             const now = new Date();
             const currentDate = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
-
-            if (lastDate !== currentDate) {
-                todayViews = 0;
-                localStorage.setItem('bt_last_date', currentDate);
-            }
-
-            totalViews = parseInt(totalViews) + 1;
-            todayViews = parseInt(todayViews) + 1;
-
-            localStorage.setItem('bt_total_views', totalViews);
-            localStorage.setItem('bt_today_views', todayViews);
-
+            if (lastDate !== currentDate) { todayViews = 0; localStorage.setItem('bt_last_date', currentDate); }
+            totalViews = parseInt(totalViews) + 1; todayViews = parseInt(todayViews) + 1;
+            localStorage.setItem('bt_total_views', totalViews); localStorage.setItem('bt_today_views', todayViews);
             document.getElementById('count-today').innerText = todayViews.toLocaleString();
             document.getElementById('count-total').innerText = totalViews.toLocaleString();
         }
         
-        window.onload = function() {
-            renderRanking();
-            updateCounter();
-        };
+        window.onload = function() { renderRanking(); updateCounter(); };
     </script>
 </body>
 </html>
