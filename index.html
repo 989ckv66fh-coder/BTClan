@@ -15,9 +15,10 @@
         .sidebar { width: 200px; background-color: #202225; padding: 20px 10px; border-right: 1px solid #40444b; shrink: 0; }
         .sidebar-title { font-size: 16px; font-weight: bold; color: #e5c07b; text-align: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #40444b; }
         .menu-title { font-size: 12px; color: #8e9297; font-weight: bold; margin: 15px 0 5px 5px; text-transform: uppercase; }
-        .menu-btn { display: block; width: 100%; background: none; border: none; color: #b9bbbe; text-align: left; padding: 10px; font-size: 14px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .menu-btn { display: block; width: 100%; background: none; border: none; color: #b9bbbe; text-align: left; padding: 10px; font-size: 14px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 5px; }
         .menu-btn:hover { background-color: #34373c; color: #fff; }
         .menu-btn.active { background-color: #5865f2; color: #fff; }
+        .hidden { display: none !important; }
 
         /* 📊 오른쪽 메인 랭킹판 스타일 */
         .main-content { flex: 1; padding: 15px 20px; padding-bottom: 80px; position: relative; }
@@ -60,9 +61,9 @@
     <!-- 1. 왼쪽 시즌 카테고리 메뉴 영역 -->
     <div class="sidebar">
         <div class="sidebar-title">★ BT CLAN ★</div>
-        <div class="menu-title">시즌 랭킹 카테고리</div>
-        <button class="menu-btn active" id="btn-current" onclick="selectCategory('current')">🔥 현재 시즌 실시간</button>
-        <button class="menu-btn" id="btn-prev" onclick="selectCategory('prev')">📜 지난 시즌 최종</button>
+        <div class="menu-title">시즌 랭킹 판</div>
+        <button class="menu-btn active" id="btn-current" onclick="selectCategory('current')">🔥 2026 상반기 실시간</button>
+        <button class="menu-btn hidden" id="btn-prev" onclick="selectCategory('prev')">📜 2026 상반기 최종</button>
     </div>
 
     <!-- 2. 오른쪽 메인 랭킹판 영역 -->
@@ -95,11 +96,10 @@
     </div>
 
     <script>
-        // 기본 보기 상태 ('current': 현재시즌실시간, 'prev': 지난시즌최종)
         let viewMode = 'current';
 
-        // ★형님은 여기에 "현재 진행 중인 시즌 전적"만 지금처럼 입력하시면 됩니다!
-        // (1월 1일, 7월 1일이 되면 이 숫자를 싹 다 0, 0으로 리셋하고 새로 입력하시면 됩니다.)
+        // ★ 형님은 여기에 "현재 진행 중인 시즌 전적"만 지금처럼 입력하시면 됩니다!
+        // 7월 1일이 되면 이 숫자를 싹 다 0, 0으로 리셋하시고 하반기 전적을 새로 치시면 됩니다.
         const clanMembers = [
             [ "SapziL[BT]", 0, 0 ],
             [ "Sun[BT]", 0, 0 ],
@@ -131,56 +131,24 @@
             [ "Visage[BT]", 0, 0 ], [ "1[BT]", 0, 0 ], [ "EunGyo[BT]", 0, 0 ], [ "qktkr[BT]", 0, 0 ], [ "KimGeoMi[BT]", 0, 0 ], [ "RINKING[BT]", 4, 1 ], [ "Tenga[BT]", 3, 3 ]
         ];
 
-        // 연도와 월을 계산해 현재 시즌명과 지난 시즌명을 가져오는 함수
-        function getSeasonNames() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const isSecondHalf = now.getMonth() >= 6; // 7월~12월은 하반기
-
-            let currentSeason = "";
-            let prevSeason = "";
-
-            if (isSecondHalf) {
-                currentSeason = `${year} 하반기`;
-                prevSeason = `${year} 상반기`;
-            } else {
-                currentSeason = `${year} 상반기`;
-                prevSeason = `${year - 1} 하반기`;
-            }
-
-            return { currentSeason, prevSeason };
-        }
-
-        // 시즌제 자동 감지 및 백업 연동 시스템
+        // 2026년 상/하반기 고정 제어 로직
         function getRankData() {
-            const seasons = getSeasonNames();
-            const currentSeasonKey = "bt_season_" + seasons.currentSeason;
-            const prevSeasonKey = "bt_season_snapshot";
+            const now = new Date();
+            const isSecondHalf = now.getMonth() >= 6; // 7월 1일 이후면 true
 
+            const prevSeasonKey = "bt_2026_first_half_snapshot";
             let savedSnapshot = localStorage.getItem(prevSeasonKey);
-            let savedSeasonTrack = localStorage.getItem('bt_current_season_track');
 
-            // 7월 1일 혹은 1월 1일이 되어 시즌이 완전히 교체되었을 때 구동
-            if (!savedSnapshot || savedSeasonTrack !== currentSeasonKey) {
-                // 직전 시즌까지 형님이 적어둔 최종 데이터를 영구 박제 처리
-                if (savedSeasonTrack) {
-                    localStorage.setItem(prevSeasonKey, localStorage.getItem('bt_current_data_backup') || JSON.stringify(clanMembers));
-                } else {
-                    localStorage.setItem(prevSeasonKey, JSON.stringify(clanMembers));
-                }
-                localStorage.setItem('bt_current_season_track', currentSeasonKey);
+            // 7월 1일이 되었을 때 딱 한 번 6월까지의 전적을 완전히 고정 백업함
+            if (isSecondHalf && !savedSnapshot) {
+                localStorage.setItem(prevSeasonKey, JSON.stringify(clanMembers));
                 savedSnapshot = localStorage.getItem(prevSeasonKey);
             }
 
-            // 실시간 백업본 최신화
-            localStorage.setItem('bt_current_data_backup', JSON.stringify(clanMembers));
-
-            const pastDataArray = JSON.parse(savedSnapshot);
-
-            // 어떤 시즌 데이터를 화면에 뿌릴지 선택
-            let targetData = clanMembers; 
-            if (viewMode === 'prev') {
-                targetData = pastDataArray; 
+            // 만약 하반기가 되었고, 형님이 메뉴에서 '지난 시즌'을 클릭했다면 백업된 상반기 데이터를 뿌려줌
+            let targetData = clanMembers;
+            if (isSecondHalf && viewMode === 'prev') {
+                targetData = JSON.parse(savedSnapshot);
             }
 
             return targetData.map(member => {
@@ -195,21 +163,33 @@
             });
         }
 
-        // 랭킹 테이블 빌드 함수
         function renderRanking() {
-            const seasons = getSeasonNames();
+            const now = new Date();
+            const isSecondHalf = now.getMonth() >= 6;
 
-            // 왼쪽 메뉴 버튼 레이블 자동 갱신
-            document.getElementById('btn-current').innerText = `🔥 ${seasons.currentSeason} 실시간`;
-            document.getElementById('btn-prev').innerText = `📜 ${seasons.prevSeason} 최종`;
-
+            const btnCurrent = document.getElementById('btn-current');
+            const btnPrev = document.getElementById('btn-prev');
             const titleEl = document.getElementById('page-title');
-            if (viewMode === 'current') titleEl.innerText = `# BT클랜원 시즌 랭킹 (${seasons.currentSeason})`;
-            if (viewMode === 'prev') titleEl.innerText = `# BT클랜원 지난 시즌 랭킹 (${seasons.prevSeason} 최종 명예의 전당)`;
+
+            // 1. 날짜에 맞춰서 메뉴 이름 구성 개편
+            if (!isSecondHalf) {
+                // 6월 30일까지는 상반기 실시간만 노출
+                btnCurrent.innerText = "🔥 2026 상반기 실시간";
+                btnPrev.classList.add('hidden');
+                titleEl.innerText = "# BT클랜원 시즌 랭킹 (2026 상반기)";
+            } else {
+                // 7월 1일부터는 하반기가 메인이 되고, 상반기 최종 탭이 활성화됨
+                btnCurrent.innerText = "🔥 2026 하반기 실시간";
+                btnPrev.innerText = "📜 2026 상반기 최종";
+                btnPrev.classList.remove('hidden');
+
+                if (viewMode === 'current') titleEl.innerText = "# BT클랜원 시즌 랭킹 (2026 하반기)";
+                if (viewMode === 'prev') titleEl.innerText = "# BT클랜원 지난 시즌 랭킹 (2026 상반기 최종 명예의 전당)";
+            }
 
             const processed = getRankData();
 
-            // 형님 요청 특수 정렬 (0승 0패 하위 배치 및 판수 우선권 적용)
+            // 정렬 알고리즘 (0승0패 하단 배치)
             processed.sort((a, b) => {
                 if (a.total > 0 && b.total > 0) {
                     if (b.points !== a.points) return b.points - a.points;
@@ -248,7 +228,6 @@
             });
         }
 
-        // 메뉴 선택 토글 기능
         function selectCategory(mode) {
             viewMode = mode;
             
@@ -261,7 +240,6 @@
             renderRanking();
         }
 
-        // 카운터 스크립트
         function updateCounter() {
             let totalViews = localStorage.getItem('bt_total_views') || 24;
             let todayViews = localStorage.getItem('bt_today_views') || 3;
